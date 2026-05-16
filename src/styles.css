@@ -5,7 +5,6 @@
 @source "../src";
 
 @custom-variant dark (&:is(.dark *));
-
 /*
  * Design system definition.
  *
