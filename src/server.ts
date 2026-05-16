@@ -53,7 +53,7 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
-// ✅ SINGLE export default — bot check + normal flow combined
+// ✅ SINGLE export default — nuclear bot bypass + normal flow
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     const ua = request.headers.get("user-agent") ?? "";
@@ -64,25 +64,35 @@ export default {
       ua.includes("Twitterbot") ||
       ua.includes("WhatsApp");
 
+    // ✅ NUCLEAR FIX — bypass h3 entirely, return OG tags directly
     if (isSocialBot) {
-      try {
-        const handler = await getServerEntry();
-        const response = await handler.fetch(request, env, ctx);
-        if (response.status === 403 || response.status === 401) {
-          return new Response(await response.text(), {
-            status: 200,
-            headers: {
-              "content-type": "text/html; charset=utf-8",
-              "cache-control": "no-store",
-            },
-          });
-        }
-        return response;
-      } catch {
-        // fallthrough to normal handler
-      }
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta property="og:type"         content="website" />
+  <meta property="og:url"          content="https://neil.pecha.workers.dev/" />
+  <meta property="og:site_name"    content="Neil Espinosa Pecha | Chief Engineer" />
+  <meta property="og:title"        content="🎂 Happy Birthday, Neil Espinosa Pecha! 🎉" />
+  <meta property="og:description"  content="Wishing our Chief Engineer a wonderful birthday! — From family, friends & colleagues of Leonis Navigation Co., Inc." />
+  <meta property="og:image"        content="https://neil.pecha.workers.dev/og-image.jpg" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type"   content="image/jpeg" />
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="🎂 Happy Birthday, Neil Espinosa Pecha! 🎉" />
+  <meta name="twitter:description" content="Wishing our Chief Engineer a wonderful birthday from Leonis Navigation Co., Inc." />
+  <meta name="twitter:image"       content="https://neil.pecha.workers.dev/og-image.jpg" />
+</head>
+<body></body>
+</html>`;
+      return new Response(html, {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
     }
 
+    // Normal flow for real users
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
